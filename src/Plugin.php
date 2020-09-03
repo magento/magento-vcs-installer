@@ -58,9 +58,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            ScriptEvents::PRE_AUTOLOAD_DUMP => ['onInstallUpdateOrDump', self::CALLBACK_PRIORITY],
-            ScriptEvents::PRE_INSTALL_CMD => ['onInstallUpdateOrDump', self::CALLBACK_PRIORITY],
-            ScriptEvents::PRE_UPDATE_CMD => ['onInstallUpdateOrDump', self::CALLBACK_PRIORITY],
+            ScriptEvents::PRE_AUTOLOAD_DUMP => ['onInstallUpdateOrDump', self::CALLBACK_PRIORITY]
         ];
     }
 
