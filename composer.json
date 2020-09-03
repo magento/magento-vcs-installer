@@ -1,0 +1,29 @@
+{
+    "name": "shiftedreality/magento-vcs-installer",
+    "type": "composer-plugin",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Oleh Posyniak",
+            "email": "oposyniak@magento.com"
+        }
+    ],
+    "require": {
+        "php": "^7.1",
+        "composer-plugin-api": "^1.1",
+        "composer/composer": "^1.10"
+    },
+    "autoload": {
+        "psr-4": {
+            "Magento\\VcsInstaller\\": "src/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "class": "Magento\\VcsInstaller\\Plugin"
+    },
+    "prefer-stable": true,
+    "minimum-stability": "dev"
+}
