@@ -89,7 +89,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
                 $this->filesystem->deleteDirectory($repoDirectory);
             }
 
-            $this->filesystem->makeDirectory($repoDirectory);
+            $this->filesystem->makeDirectory($repoDirectory, 0755, true);
 
             $this->io->write(sprintf(
                 'Cloning "%s" => %s',
