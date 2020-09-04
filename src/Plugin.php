@@ -94,6 +94,12 @@ class Plugin implements PluginInterface, EventSubscriberInterface
                 $composerAutoload = array_replace($composerAutoload, $repoComposer->getPackage()->getAutoload());
                 $composerRequire = array_replace($composerRequire, $repoComposer->getPackage()->getRequires());
             }
+
+            if (!empty($meta['base'])) {
+                $this->io->write(sprintf('Linking "%s(%s)" => %s', $name, $repoDirectory, $root));
+
+                $this->copierFactory->create(CopierFactory::STRATEGY_SYMLINK)->copy($repoDirectory, $root);
+            }
         }
 
         $this->io->write('Modifying original composer.json');
