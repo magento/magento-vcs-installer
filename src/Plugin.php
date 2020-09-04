@@ -85,10 +85,10 @@ class Plugin implements PluginInterface, EventSubscriberInterface
         }
 
         if (!empty($_ENV['MAGENTO_CLOUD_TREE_ID'])) {
-            $this->io->write(
+            $this->io->write(sprintf(
                 'Detected Cloud environment, switching strategy to "%s"',
                 CopierFactory::STRATEGY_COPY
-            );
+            ));
 
             $strategy = CopierFactory::STRATEGY_COPY;
         }

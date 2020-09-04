@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\VcsInstaller\Util;
 
 use FilesystemIterator;
+use ErrorException;
 
 class Filesystem
 {
@@ -45,7 +46,7 @@ class Filesystem
             // just looping through and waxing all of the files in this directory
             // and calling directories recursively, so we delete the real path.
             else {
-                $this->delete([$item->getPathname()]);
+                $this->delete($item->getPathname());
             }
         }
 
@@ -66,17 +67,21 @@ class Filesystem
     }
 
     /**
-     * @param array $paths
+     * @param $paths
      * @return bool
      */
-    public function delete(array $paths): bool
+    public function delete($paths): bool
     {
         $paths = is_array($paths) ? $paths : func_get_args();
 
         $success = true;
 
         foreach ($paths as $path) {
-            if (!@unlink($path)) {
+            try {
+                if (!@unlink($path)) {
+                    $success = false;
+                }
+            } catch (ErrorException $e) {
                 $success = false;
             }
         }
@@ -100,11 +105,7 @@ class Filesystem
         return mkdir($path, $mode, $recursive);
     }
 
-    /**
-     * @param string $path
-     * @return false|string
-     */
-    public function get(string $path)
+    public function get($path)
     {
         if ($this->isFile($path)) {
             return file_get_contents($path);
@@ -113,11 +114,7 @@ class Filesystem
         throw new FileNotFoundException("File does not exist at path {$path}.");
     }
 
-    /**
-     * @param string $file
-     * @return bool
-     */
-    public function isFile(string $file): bool
+    public function isFile($file)
     {
         return is_file($file);
     }
