@@ -105,7 +105,11 @@ class Filesystem
         return mkdir($path, $mode, $recursive);
     }
 
-    public function get($path)
+    /**
+     * @param string $path
+     * @return false|string
+     */
+    public function get(string $path)
     {
         if ($this->isFile($path)) {
             return file_get_contents($path);
@@ -114,7 +118,11 @@ class Filesystem
         throw new FileNotFoundException("File does not exist at path {$path}.");
     }
 
-    public function isFile($file)
+    /**
+     * @param string $file
+     * @return bool
+     */
+    public function isFile(string $file): bool
     {
         return is_file($file);
     }
