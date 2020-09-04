@@ -9,11 +9,13 @@ namespace Magento\VcsInstaller;
 
 use Composer\Composer;
 use Composer\EventDispatcher\EventSubscriberInterface;
+use Composer\Factory;
 use Composer\IO\IOInterface;
+use Composer\IO\NullIO;
 use Composer\Package\Package;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\ScriptEvents;
-use Magento\VcsInstaller\Plugin\Linker;
+use Magento\VcsInstaller\Plugin\CopierFactory;
 use Magento\VcsInstaller\Util\Filesystem;
 use Composer\Script\Event as ScriptEvent;
 
@@ -23,7 +25,6 @@ use Composer\Script\Event as ScriptEvent;
 class Plugin implements PluginInterface, EventSubscriberInterface
 {
     private const CALLBACK_PRIORITY = 40000;
-
     private const DIR = '.dev';
 
     /**
@@ -37,9 +38,9 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     private $io;
 
     /**
-     * @var Linker
+     * @var CopierFactory
      */
-    private $linker;
+    private $copierFactory;
 
     /**
      * @param Composer $composer
@@ -49,7 +50,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     {
         $this->io = $io;
         $this->filesystem = new Filesystem();
-        $this->linker = new Linker();
+        $this->copierFactory = new CopierFactory();
     }
 
     /**
@@ -58,7 +59,9 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            ScriptEvents::PRE_AUTOLOAD_DUMP => ['onInstallUpdateOrDump', self::CALLBACK_PRIORITY]
+            ScriptEvents::PRE_INSTALL_CMD => ['onInstallUpdateOrDump', self::CALLBACK_PRIORITY],
+            ScriptEvents::PRE_UPDATE_CMD => ['onInstallUpdateOrDump', self::CALLBACK_PRIORITY],
+            ScriptEvents::PRE_AUTOLOAD_DUMP => ['onInstallUpdateOrDump', self::CALLBACK_PRIORITY],
         ];
     }
 
@@ -67,53 +70,53 @@ class Plugin implements PluginInterface, EventSubscriberInterface
      */
     public function onInstallUpdateOrDump(ScriptEvent $event): void
     {
-
         $composer = $event->getComposer();
         $root = dirname($composer->getConfig()->get('vendor-dir'));
-
         $extra = $composer->getPackage()->getExtra();
 
         if (empty($extra['deploy']['repo'])) {
             return;
         }
 
+        $composerAutoload = $composer->getPackage()->getAutoload();
+        $composerRequire = $composer->getPackage()->getRequires();
+
         foreach ($extra['deploy']['repo'] as $name => $meta) {
             $repoDirectory = $root . DIRECTORY_SEPARATOR . self::DIR . DIRECTORY_SEPARATOR . $name;
 
-            $this->io->write(sprintf(
-                'Recreating directory %s',
-                $repoDirectory
-            ));
+            $this->download($composer, $repoDirectory, $name, $meta);
 
-            if ($this->filesystem->exists($repoDirectory)) {
-                $this->filesystem->deleteDirectory($repoDirectory);
-            }
+            $repoComposerFile = $repoDirectory . DIRECTORY_SEPARATOR . 'composer.json';
 
-            $this->filesystem->makeDirectory($repoDirectory, 0755, true);
+            if ($this->filesystem->exists($repoComposerFile)) {
+                $repoComposer = Factory::create(new NullIO(), $repoComposerFile);
 
-            $this->io->write(sprintf(
-                'Cloning "%s" => %s',
-                $name,
-                $repoDirectory
-            ));
-
-            $package = new Package($name, $meta['ref'], $meta['ref']);
-            $package->setSourceType('git');
-            $package->setSourceUrl($meta['url']);
-            $package->setSourceReference($meta['ref']);
-
-            $composer->getDownloadManager()->download($package, $repoDirectory);
-
-            if (!empty($meta['base'])) {
-                $this->io->write(sprintf(
-                    'Linking "%s(%s)" => %s',
-                    $name,
-                    $repoDirectory,
-                    $root
-                ));
-
-                $this->linker->link($repoDirectory, $root);
+                $composerAutoload = array_replace($composerAutoload, $repoComposer->getPackage()->getAutoload());
+                $composerRequire = array_replace($composerRequire, $repoComposer->getPackage()->getRequires());
             }
         }
+
+        $this->io->write('Modifying original composer.json');
+
+        $composer->getPackage()->setAutoload($composerAutoload);
+        $composer->getPackage()->setRequires($composerRequire);
+    }
+
+    /**
+     * @param Composer $composer
+     * @param string $repoDirectory
+     * @param string $name
+     * @param array $meta
+     */
+    private function download(Composer $composer, string $repoDirectory, string $name, array $meta):void
+    {
+        $this->io->write(sprintf('Cloning "%s" => %s', $name, $repoDirectory));
+
+        $package = new Package($name, $meta['ref'], $meta['ref']);
+        $package->setSourceType('git');
+        $package->setSourceUrl($meta['url']);
+        $package->setSourceReference($meta['ref']);
+
+        $composer->getDownloadManager()->download($package, $repoDirectory);
     }
 }

@@ -104,4 +104,18 @@ class Filesystem
 
         return mkdir($path, $mode, $recursive);
     }
+
+    public function get($path)
+    {
+        if ($this->isFile($path)) {
+            return file_get_contents($path);
+        }
+
+        throw new FileNotFoundException("File does not exist at path {$path}.");
+    }
+
+    public function isFile($file)
+    {
+        return is_file($file);
+    }
 }

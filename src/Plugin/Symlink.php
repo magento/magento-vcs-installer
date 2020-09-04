@@ -10,8 +10,11 @@ namespace Magento\VcsInstaller\Plugin;
 /**
  * Links files between folders.
  */
-class Linker
+class Symlink implements CopierInterface
 {
+    /**
+     * @var string[]
+     */
     private static $excluded = [
         '/.git',
         '/composer.json',
@@ -24,10 +27,10 @@ class Linker
      * @param string $from
      * @param string $to
      */
-    public function link(string $from, string $to): void
+    public function copy(string $from, string $to): void
     {
         foreach ($this->scanFiles($from) as $filename) {
-            $target = preg_replace('#^' . preg_quote($from) . "#", '', $filename);
+            $target = preg_replace('#^' . preg_quote($from, '/') . "#", '', $filename);
 
             if (in_array($filename, self::$excluded, true)) {
                 continue;
@@ -52,9 +55,12 @@ class Linker
         }
     }
 
-    public function unlink(string $to): void
+    /**
+     * @param string $path
+     */
+    public function unlink(string $path): void
     {
-        foreach ($this->scanFiles($to) as $filename) {
+        foreach ($this->scanFiles($path) as $filename) {
             if (is_link($filename)) {
                 $this->unlinkFile($filename);
             }
@@ -87,19 +93,8 @@ class Linker
      * @param string $filename
      * @return void
      */
-    private function unlinkFile($filename): void
+    private function unlinkFile(string $filename): void
     {
         stripos(PHP_OS, 'WIN') === 0 && is_dir($filename) ? @rmdir($filename) : @unlink($filename);
-    }
-
-    /**
-     * Resolve path to Unix format
-     *
-     * @param string $path
-     * @return string
-     */
-    private function resolvePath($path)
-    {
-        return ltrim(str_replace('\\', '/', $path), '/');
     }
 }

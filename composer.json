@@ -10,6 +10,7 @@
     ],
     "require": {
         "php": "^7.1",
+        "ext-json": "^1.7",
         "composer-plugin-api": "^1.1",
         "composer/composer": "^1.10"
     },
