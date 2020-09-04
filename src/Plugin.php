@@ -78,6 +78,16 @@ class Plugin implements PluginInterface, EventSubscriberInterface
             return;
         }
 
+        $strategy = CopierFactory::STRATEGY_SYMLINK;
+
+        if (!empty($extra['deploy']['strategy'])) {
+            $strategy = $extra['deploy']['strategy'];
+        }
+
+        if (!empty($_ENV['MAGENTO_CLOUD_TREE_ID'])) {
+            $strategy = CopierFactory::STRATEGY_SYMLINK;
+        }
+
         $composerAutoload = $composer->getPackage()->getAutoload();
         $composerRequire = $composer->getPackage()->getRequires();
 
@@ -96,13 +106,19 @@ class Plugin implements PluginInterface, EventSubscriberInterface
             }
 
             if (!empty($meta['base'])) {
-                $this->io->write(sprintf('Linking "%s(%s)" => %s', $name, $repoDirectory, $root));
+                $this->io->write(sprintf(
+                    'Copying "%s(%s)" => %s using "%s" strategy',
+                    $name,
+                    $repoDirectory,
+                    $root,
+                    $strategy
+                ));
 
-                $this->copierFactory->create(CopierFactory::STRATEGY_SYMLINK)->copy($repoDirectory, $root);
+                $this->copierFactory->create($strategy)->copy($repoDirectory, $root);
             }
         }
 
-        $this->io->write('Modifying original composer.json');
+        $this->io->write('Updating composer.lock');
 
         $composer->getPackage()->setAutoload($composerAutoload);
         $composer->getPackage()->setRequires($composerRequire);
@@ -114,7 +130,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
      * @param string $name
      * @param array $meta
      */
-    private function download(Composer $composer, string $repoDirectory, string $name, array $meta):void
+    private function download(Composer $composer, string $repoDirectory, string $name, array $meta): void
     {
         $this->io->write(sprintf('Cloning "%s" => %s', $name, $repoDirectory));
 

@@ -58,7 +58,7 @@ class Symlink implements CopierInterface
     /**
      * @param string $path
      */
-    public function unlink(string $path): void
+    public function restore(string $path): void
     {
         foreach ($this->scanFiles($path) as $filename) {
             if (is_link($filename)) {

@@ -10,12 +10,14 @@ namespace Magento\VcsInstaller\Plugin;
 class CopierFactory
 {
     public const STRATEGY_SYMLINK = 'symlink';
+    public const STRATEGY_COPY = 'copy';
 
     /**
      * @var string[]
      */
     private static $strategies = [
-        self::STRATEGY_SYMLINK => Symlink::class
+        self::STRATEGY_SYMLINK => Symlink::class,
+        self::STRATEGY_COPY => Copy::class
     ];
 
     /**
