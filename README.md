@@ -21,7 +21,7 @@ composer require "shiftedreality/magento-vcs-installer:dev-master" --no-update
                 "base": true
             }
         }
-    },
+    }
 }
 ```
 
