@@ -127,6 +127,10 @@ class Plugin implements PluginInterface, EventSubscriberInterface
 
         $composer->getPackage()->setAutoload($composerAutoload);
         $composer->getPackage()->setRequires($composerRequire);
+        $composer->getPackage()->setExtra(array_merge([
+            $composer->getPackage()->getExtra(),
+            ['deploy' => ['date' => date('r')]]
+        ]));
     }
 
     /**
