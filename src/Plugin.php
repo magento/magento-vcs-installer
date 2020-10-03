@@ -15,6 +15,7 @@ use Composer\IO\NullIO;
 use Composer\Package\Package;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\ScriptEvents;
+use Composer\Semver\VersionParser;
 use Magento\VcsInstaller\Plugin\CopierFactory;
 use Magento\VcsInstaller\Util\Filesystem;
 use Composer\Script\Event as ScriptEvent;
@@ -25,7 +26,6 @@ use Composer\Script\Event as ScriptEvent;
 class Plugin implements PluginInterface, EventSubscriberInterface
 {
     private const CALLBACK_PRIORITY = 40000;
-    private const DIR = '.dev';
 
     /**
      * @var Filesystem
@@ -43,6 +43,11 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     private $copierFactory;
 
     /**
+     * @var VersionParser
+     */
+    private $versionParser;
+
+    /**
      * @param Composer $composer
      * @param IOInterface $io
      */
@@ -51,6 +56,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
         $this->io = $io;
         $this->filesystem = new Filesystem();
         $this->copierFactory = new CopierFactory();
+        $this->versionParser = new VersionParser();
     }
 
     /**
@@ -71,8 +77,10 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     public function onInstallUpdateOrDump(ScriptEvent $event): void
     {
         $composer = $event->getComposer();
-        $root = dirname($composer->getConfig()->get('vendor-dir'));
         $extra = $composer->getPackage()->getExtra();
+
+        $vendorDir = $composer->getConfig()->get('vendor-dir');
+        $rootDir = dirname($vendorDir);
 
         if (empty($extra['deploy']['repo'])) {
             return;
@@ -97,7 +105,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
         $composerRequire = $composer->getPackage()->getRequires();
 
         foreach ($extra['deploy']['repo'] as $name => $meta) {
-            $repoDirectory = $root . DIRECTORY_SEPARATOR . self::DIR . DIRECTORY_SEPARATOR . $name;
+            $repoDirectory = $vendorDir . DIRECTORY_SEPARATOR . $name;
 
             $this->download($composer, $repoDirectory, $name, $meta);
 
@@ -115,11 +123,11 @@ class Plugin implements PluginInterface, EventSubscriberInterface
                     'Copying "%s(%s)" => %s using "%s" strategy',
                     $name,
                     $repoDirectory,
-                    $root,
+                    $rootDir,
                     $strategy
                 ));
 
-                $this->copierFactory->create($strategy)->copy($repoDirectory, $root);
+                $this->copierFactory->create($strategy)->copy($repoDirectory, $rootDir);
             }
         }
 
@@ -127,11 +135,6 @@ class Plugin implements PluginInterface, EventSubscriberInterface
 
         $composer->getPackage()->setAutoload($composerAutoload);
         $composer->getPackage()->setRequires($composerRequire);
-
-        $extra = $composer->getPackage()->getExtra();
-        $extra['deploy']['date'] = date('r');
-
-        $composer->getPackage()->setExtra($extra);
     }
 
     /**
@@ -144,11 +147,24 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     {
         $this->io->write(sprintf('Cloning "%s" => %s', $name, $repoDirectory));
 
-        $package = new Package($name, $meta['ref'], $meta['ref']);
+        $version = $meta['ref'];
+        $normalizedVersion = $this->versionParser->normalize($version);
+
+        $package = new Package($name, $version, $version);
         $package->setSourceType('git');
         $package->setSourceUrl($meta['url']);
-        $package->setSourceReference($meta['ref']);
+        $package->setSourceReference($normalizedVersion);
+        $package->setInstallationSource('source');
+        $package->setType('project');
 
-        $composer->getDownloadManager()->download($package, $repoDirectory);
+        if ($this->filesystem->exists($repoDirectory . '/composer.json')) {
+            $this->io->write(sprintf('Updating "%s"', $name));
+
+            $composer->getDownloadManager()->update($package, $package, $repoDirectory);
+        } else {
+            $this->io->write(sprintf('Installing "%s"', $name));
+
+            $composer->getDownloadManager()->download($package, $repoDirectory, true);
+        }
     }
 }
