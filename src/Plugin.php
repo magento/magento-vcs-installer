@@ -15,7 +15,6 @@ use Composer\IO\NullIO;
 use Composer\Package\Package;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\ScriptEvents;
-use Composer\Semver\VersionParser;
 use Magento\VcsInstaller\Plugin\CopierFactory;
 use Magento\VcsInstaller\Util\Filesystem;
 use Composer\Script\Event as ScriptEvent;
@@ -43,11 +42,6 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     private $copierFactory;
 
     /**
-     * @var VersionParser
-     */
-    private $versionParser;
-
-    /**
      * @param Composer $composer
      * @param IOInterface $io
      */
@@ -56,7 +50,6 @@ class Plugin implements PluginInterface, EventSubscriberInterface
         $this->io = $io;
         $this->filesystem = new Filesystem();
         $this->copierFactory = new CopierFactory();
-        $this->versionParser = new VersionParser();
     }
 
     /**
@@ -148,7 +141,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
         $this->io->write(sprintf('Cloning "%s" => %s', $name, $repoDirectory));
 
         $version = $meta['ref'];
-        $normalizedVersion = $this->versionParser->normalize($version);
+        $normalizedVersion = preg_replace('{(?:^dev-|(?:\.x)?-dev$)}i', '', $version);
 
         $package = new Package($name, $version, $version);
         $package->setSourceType('git');
