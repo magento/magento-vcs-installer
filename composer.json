@@ -1,5 +1,5 @@
 {
-    "name": "shiftedreality/magento-vcs-installer",
+    "name": "magento/magento-vcs-installer",
     "type": "composer-plugin",
     "license": "MIT",
     "authors": [
