@@ -153,6 +153,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
         if ($this->filesystem->exists($repoDirectory . '/composer.json')) {
             $this->io->write(sprintf('Updating "%s"', $name));
 
+            $composer->getConfig()->merge(['config' => ['discard-changes' => true]]);
             $composer->getDownloadManager()->update($package, $package, $repoDirectory);
         } else {
             $this->io->write(sprintf('Installing "%s"', $name));
