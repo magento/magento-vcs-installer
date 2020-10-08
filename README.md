@@ -40,12 +40,12 @@ stage:
     "deploy": {
         "version": "2.4.0",
         "repo": {
-            "ce": {
+            "magento/magento2ce": {
                 "url": "git@github.com:magento-commerce/magento2ce.git",
                 "ref": "dev-2.4-develop",
                 "base": true
             },
-            "ee": {
+            "magento/magento2ee": {
                 "url": "git@github.com:magento-commerce/magento2ee.git",
                 "ref": "dev-2.4-develop",
                 "base": true
