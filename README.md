@@ -5,7 +5,7 @@ This tool provides a possibility to deploy Magento source code on environments w
 ## Installation
 
 ```
-composer config repositories.installer git git@github.com:magento/magento-vcs-installer.git
+composer config repositories.installer git git@github.com:magento-commerce/magento-vcs-installer.git
 composer config minimum-stability dev
 composer require "magento/magento-vcs-installer:dev-master" --no-update
 ```
