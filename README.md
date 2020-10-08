@@ -10,6 +10,10 @@ This tool provides a possibility to deploy Magento source code on environments w
 1. Clone repository
 1. Nivagate to the cloned directory
 
+### Remove Magento depndencies
+
+1. Remove all `magento/*` depndencies from `require` section of `composer.json`
+
 ### Add dependencies
 
 ```
