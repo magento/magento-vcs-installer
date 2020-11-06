@@ -14,7 +14,6 @@ class Copy implements CopierInterface
      */
     private static $exclude = [
         '.git',
-        'vendor',
         'composer.json',
         'composer.lock'
     ];
