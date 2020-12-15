@@ -42,6 +42,7 @@ class Symlink implements CopierInterface
                 if (is_link(dirname($to . $target))) {
                     continue;
                 }
+
                 @symlink($filename, $to . $target);
             } else {
                 continue;
@@ -77,8 +78,8 @@ class Symlink implements CopierInterface
     {
         $results = [];
         foreach (glob($path . DIRECTORY_SEPARATOR . '*') as $filename) {
-
             $results[] = $filename;
+
             if (is_dir($filename)) {
                 $results = array_merge($results, $this->scanFiles($filename));
             }

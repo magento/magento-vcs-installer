@@ -40,12 +40,10 @@ class Filesystem
             // keep iterating through each file until the directory is cleaned.
             if ($item->isDir() && !$item->isLink()) {
                 $this->deleteDirectory($item->getPathname());
-            }
-
-            // If the item is just a file, we can go ahead and delete it since we're
-            // just looping through and waxing all of the files in this directory
-            // and calling directories recursively, so we delete the real path.
-            else {
+            } else {
+                // If the item is just a file, we can go ahead and delete it since we're
+                // just looping through and waxing all of the files in this directory
+                // and calling directories recursively, so we delete the real path.
                 $this->delete($item->getPathname());
             }
         }
