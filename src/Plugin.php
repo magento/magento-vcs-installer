@@ -76,6 +76,8 @@ class Plugin implements PluginInterface, EventSubscriberInterface
         $rootDir = dirname($vendorDir);
 
         if (empty($extra['deploy']['repo'])) {
+            $this->io->write('No VCS repositories defined');
+
             return;
         }
 
@@ -90,8 +92,8 @@ class Plugin implements PluginInterface, EventSubscriberInterface
             $strategy = CopierFactory::STRATEGY_COPY;
         }
 
-        $composerAutoload = $composer->getPackage()->getAutoload();
-        $composerRequire = $composer->getPackage()->getRequires();
+        $composerAutoload = [$composer->getPackage()->getAutoload()];
+        $composerRequire = [$composer->getPackage()->getRequires()];
 
         foreach ($extra['deploy']['repo'] as $name => $meta) {
             $repoDirectory = $vendorDir . DIRECTORY_SEPARATOR . $name;
@@ -103,8 +105,8 @@ class Plugin implements PluginInterface, EventSubscriberInterface
             if ($this->filesystem->exists($repoComposerFile)) {
                 $repoComposer = Factory::create(new NullIO(), $repoComposerFile);
 
-                $composerAutoload = array_replace($composerAutoload, $repoComposer->getPackage()->getAutoload());
-                $composerRequire = array_replace($composerRequire, $repoComposer->getPackage()->getRequires());
+                $composerAutoload[] = $repoComposer->getPackage()->getAutoload();
+                $composerRequire[] = $repoComposer->getPackage()->getRequires();
             }
 
             if (!empty($meta['base'])) {
@@ -122,8 +124,8 @@ class Plugin implements PluginInterface, EventSubscriberInterface
 
         $this->io->write('Updating composer.lock');
 
-        $composer->getPackage()->setAutoload($composerAutoload);
-        $composer->getPackage()->setRequires($composerRequire);
+        $composer->getPackage()->setAutoload(array_replace(...$composerAutoload));
+        $composer->getPackage()->setRequires(array_replace(...$composerRequire));
     }
 
     /**
