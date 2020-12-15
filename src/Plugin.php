@@ -53,7 +53,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     }
 
     /**
-     * {@inheritdoc}
+     * @inheritDoc
      */
     public static function getSubscribedEvents(): array
     {
@@ -79,11 +79,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
             return;
         }
 
-        $strategy = CopierFactory::STRATEGY_SYMLINK;
-
-        if (!empty($extra['deploy']['strategy'])) {
-            $strategy = $extra['deploy']['strategy'];
-        }
+        $strategy = $extra['deploy']['strategy'] ?? CopierFactory::STRATEGY_SYMLINK;
 
         if (!empty($_ENV['MAGENTO_CLOUD_TREE_ID'])) {
             $this->io->write(sprintf(
@@ -156,9 +152,31 @@ class Plugin implements PluginInterface, EventSubscriberInterface
             $composer->getConfig()->merge(['config' => ['discard-changes' => true]]);
             $composer->getDownloadManager()->update($package, $package, $repoDirectory);
         } else {
+            $this->io->write(sprintf('Cleaning "%s"', $name));
+
+            $this->filesystem->deleteDirectory($repoDirectory);
+
             $this->io->write(sprintf('Installing "%s"', $name));
 
-            $composer->getDownloadManager()->download($package, $repoDirectory, true);
+            if (version_compare(PluginInterface::PLUGIN_API_VERSION, '2.0.0', '<')) {
+                $composer->getDownloadManager()->download($package, $repoDirectory);
+            } else {
+                $composer->getDownloadManager()->install($package, $repoDirectory);
+            }
         }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function uninstall(Composer $composer, IOInterface $io): void
+    {
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function deactivate(Composer $composer, IOInterface $io): void
+    {
     }
 }
