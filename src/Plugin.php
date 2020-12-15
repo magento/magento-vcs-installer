@@ -27,6 +27,16 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     private const CALLBACK_PRIORITY = 40000;
 
     /**
+     * Types of supported Magento component packages
+     */
+    private const COMPONENT_PACKAGE_TYPES = [
+        'magento2-module',
+        'magento2-theme',
+        'magento2-language',
+        'magento2-library'
+    ];
+
+    /**
      * @var Filesystem
      */
     private $filesystem;
@@ -103,20 +113,25 @@ class Plugin implements PluginInterface, EventSubscriberInterface
             if ($this->filesystem->exists($repoComposerFile)) {
                 $repoComposer = Factory::create(new NullIO(), $repoComposerFile);
 
-                $composerAutoload = array_replace($composerAutoload, $repoComposer->getPackage()->getAutoload());
-                $composerRequire = array_replace($composerRequire, $repoComposer->getPackage()->getRequires());
-            }
+                $this->io->write("Project type: " .  $repoComposer->getPackage()->getType());
+                if ($repoComposer->getPackage()->getType() === CopierFactory::TYPE_PROJECT) {
+                    $composerAutoload = array_replace($composerAutoload, $repoComposer->getPackage()->getAutoload());
+                    $composerRequire = array_replace($composerRequire, $repoComposer->getPackage()->getRequires());
 
-            if (!empty($meta['base'])) {
-                $this->io->write(sprintf(
-                    'Copying "%s(%s)" => %s using "%s" strategy',
-                    $name,
-                    $repoDirectory,
-                    $rootDir,
-                    $strategy
-                ));
+                    $this->io->write(sprintf(
+                        'Copying "%s(%s)" => %s using "%s" strategy',
+                        $name,
+                        $repoDirectory,
+                        $rootDir,
+                        $strategy
+                    ));
 
-                $this->copierFactory->create($strategy)->copy($repoDirectory, $rootDir);
+                    $this->copierFactory
+                        ->create($strategy)
+                        ->copy($repoDirectory, $rootDir);
+                }
+            } else {
+                $this->processNonComposerPackage($repoDirectory, $rootDir, $strategy);
             }
         }
 
@@ -164,6 +179,52 @@ class Plugin implements PluginInterface, EventSubscriberInterface
                 $composer->getDownloadManager()->install($package, $repoDirectory);
             }
         }
+    }
+
+    /**
+     * Processes repositories with magento modules in the root
+     *
+     * @param string $repoDirectory
+     * @param string $rootDir
+     * @param string $strategy
+     */
+    private function processNonComposerPackage(string $repoDirectory, string $rootDir, string $strategy): void
+    {
+        $dirIterator = $this->filesystem->getRecursiveFileIterator(
+            $repoDirectory,
+            '/composer.json$/'
+        );
+
+        foreach ($dirIterator as $currentFileInfo) {
+            $packageInfo = json_decode($this->filesystem->get($currentFileInfo->getPathName()), true);
+            if ($this->isComponentPackage($packageInfo)) {
+                $this->io->write(sprintf(
+                    'Copying "%s(%s)" => %s using "%s" strategy',
+                    basename($currentFileInfo->getPath()),
+                    $currentFileInfo->getPath(),
+                    $rootDir . '/app/code/Magento/' . basename($currentFileInfo->getPath()),
+                    $strategy
+                ));
+
+                $this->copierFactory
+                    ->create($strategy)
+                    ->copy(
+                        $currentFileInfo->getPath(),
+                        $rootDir . '/app/code/Magento/' . basename($currentFileInfo->getPath())
+                    );
+            }
+        }
+    }
+
+    /**
+     * Check if provided package info belongs to a Magento component package
+     *
+     * @param array $packageInfo
+     * @return bool
+     */
+    private function isComponentPackage(array $packageInfo): bool
+    {
+        return isset($packageInfo['type']) && in_array($packageInfo['type'], self::COMPONENT_PACKAGE_TYPES);
     }
 
     /**

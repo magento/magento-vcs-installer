@@ -12,6 +12,8 @@ class CopierFactory
     public const STRATEGY_SYMLINK = 'symlink';
     public const STRATEGY_COPY = 'copy';
 
+    public const TYPE_PROJECT = 'project';
+
     /**
      * @var string[]
      */
