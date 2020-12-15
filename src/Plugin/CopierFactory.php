@@ -24,7 +24,7 @@ class CopierFactory
 
     /**
      * @param string $strategy
-     * @return mixed
+     * @return CopierInterface
      *
      * @throws CopierException
      */

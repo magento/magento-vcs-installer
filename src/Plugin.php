@@ -102,8 +102,8 @@ class Plugin implements PluginInterface, EventSubscriberInterface
             $strategy = CopierFactory::STRATEGY_COPY;
         }
 
-        $composerAutoload = $composer->getPackage()->getAutoload();
-        $composerRequire = $composer->getPackage()->getRequires();
+        $composerAutoload = [$composer->getPackage()->getAutoload()];
+        $composerRequire = [$composer->getPackage()->getRequires()];
 
         foreach ($extra['deploy']['repo'] as $name => $meta) {
             $repoDirectory = $vendorDir . DIRECTORY_SEPARATOR . $name;
@@ -115,10 +115,11 @@ class Plugin implements PluginInterface, EventSubscriberInterface
             if ($this->filesystem->exists($repoComposerFile)) {
                 $repoComposer = Factory::create(new NullIO(), $repoComposerFile);
 
-                $this->io->write("Project type: " .  $repoComposer->getPackage()->getType());
+                $this->io->write('Project type: ' .  $repoComposer->getPackage()->getType());
+
                 if ($repoComposer->getPackage()->getType() === CopierFactory::TYPE_PROJECT) {
-                    $composerAutoload = array_replace($composerAutoload, $repoComposer->getPackage()->getAutoload());
-                    $composerRequire = array_replace($composerRequire, $repoComposer->getPackage()->getRequires());
+                    $composerAutoload[] = $repoComposer->getPackage()->getAutoload();
+                    $composerRequire[] = $repoComposer->getPackage()->getRequires();
 
                     $this->io->write(sprintf(
                         'Copying "%s(%s)" => %s using "%s" strategy',
@@ -128,8 +129,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
                         $strategy
                     ));
 
-                    $this->copierFactory
-                        ->create($strategy)
+                    $this->copierFactory->create($strategy)
                         ->copy($repoDirectory, $rootDir);
                 }
             } else {
@@ -139,8 +139,8 @@ class Plugin implements PluginInterface, EventSubscriberInterface
 
         $this->io->write('Updating composer.lock');
 
-        $composer->getPackage()->setAutoload($composerAutoload);
-        $composer->getPackage()->setRequires($composerRequire);
+        $composer->getPackage()->setAutoload(...$composerAutoload);
+        $composer->getPackage()->setRequires(...$composerRequire);
     }
 
     /**
@@ -175,6 +175,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
 
             $this->io->write(sprintf('Installing "%s"', $name));
 
+            // @phpstan-ignore-next-line
             if (version_compare(PluginInterface::PLUGIN_API_VERSION, '2.0.0', '<')) {
                 $composer->getDownloadManager()->download($package, $repoDirectory);
             } else {
@@ -208,8 +209,7 @@ class Plugin implements PluginInterface, EventSubscriberInterface
                     $strategy
                 ));
 
-                $this->copierFactory
-                    ->create($strategy)
+                $this->copierFactory->create($strategy)
                     ->copy(
                         $currentFileInfo->getPath(),
                         $rootDir . '/app/code/Magento/' . basename($currentFileInfo->getPath())

@@ -6,7 +6,7 @@ This tool provides a possibility to deploy Magento source code on environments w
 
 ### Clone Magento Cloud project locally
 
-1. Open Magento Cloud UI and find link to clone via GIT or `magento-cloud` CLI
+1. Open Magento Cloud UI and find link to clone via Git or `magento-cloud` CLI
 1. Clone repository
 1. Navigate to the cloned directory
 
