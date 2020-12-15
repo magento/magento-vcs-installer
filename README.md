@@ -6,7 +6,7 @@ This tool provides a possibility to deploy Magento source code on environments w
 
 ### Clone Magento Cloud project locally
 
-1. Open Magento Cloud UI and find link to clone via GIT or `magento-cloud` CLI
+1. Open Magento Cloud UI and find link to clone via Git or `magento-cloud` CLI
 1. Clone repository
 1. Navigate to the cloned directory
 
@@ -23,6 +23,12 @@ composer require "magento/magento-vcs-installer:dev-master" --no-update
 composer require "magento/ece-tools" --no-update
 ```
 
+### Install dependencies
+
+```
+composer update
+```
+
 ## Mock version
 
 Create a file `.magento.env.yaml` with the version which will represent the Magento version:
@@ -30,7 +36,7 @@ Create a file `.magento.env.yaml` with the version which will represent the Mage
 ```
 stage:
   global:
-    DEPLOYED_MAGENTO_VERSION_FROM_GIT: '2.4.0'
+    DEPLOYED_MAGENTO_VERSION_FROM_GIT: '2.4.2'
 ```
 
 ## Configuration
@@ -38,7 +44,6 @@ stage:
 ```
 "extra": {
     "deploy": {
-        "version": "2.4.0",
         "repo": {
             "magento/magento2ce": {
                 "url": "git@github.com:magento-commerce/magento2ce.git",

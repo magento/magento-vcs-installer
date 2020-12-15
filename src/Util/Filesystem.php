@@ -22,11 +22,11 @@ class Filesystem
     }
 
     /**
-     * @param $directory
-     * @param false $preserve
+     * @param string $directory
+     * @param bool $preserve
      * @return bool
      */
-    public function deleteDirectory($directory, $preserve = false): bool
+    public function deleteDirectory(string $directory, bool $preserve = false): bool
     {
         if (!$this->isDirectory($directory)) {
             return false;
@@ -44,7 +44,7 @@ class Filesystem
                 // If the item is just a file, we can go ahead and delete it since we're
                 // just looping through and waxing all of the files in this directory
                 // and calling directories recursively, so we delete the real path.
-                $this->delete($item->getPathname());
+                $this->delete([$item->getPathname()]);
             }
         }
 
@@ -56,22 +56,20 @@ class Filesystem
     }
 
     /**
-     * @param $directory
+     * @param string $directory
      * @return bool
      */
-    public function isDirectory($directory): bool
+    public function isDirectory(string $directory): bool
     {
         return is_dir($directory);
     }
 
     /**
-     * @param $paths
+     * @param array $paths
      * @return bool
      */
-    public function delete($paths): bool
+    public function delete(array $paths): bool
     {
-        $paths = is_array($paths) ? $paths : func_get_args();
-
         $success = true;
 
         foreach ($paths as $path) {
@@ -88,13 +86,13 @@ class Filesystem
     }
 
     /**
-     * @param $path
+     * @param string $path
      * @param int $mode
-     * @param false $recursive
-     * @param false $force
+     * @param bool $recursive
+     * @param bool $force
      * @return bool
      */
-    public function makeDirectory($path, $mode = 0755, $recursive = false, $force = false): bool
+    public function makeDirectory(string $path, int $mode = 0755, bool $recursive = false, bool $force = false): bool
     {
         if ($force) {
             return @mkdir($path, $mode, $recursive);
@@ -143,6 +141,7 @@ class Filesystem
         if ($excludePattern) {
             $recursiveDirIterator = new \RegexIterator($recursiveDirIterator, $excludePattern, \RegexIterator::MATCH);
         }
+
         return new \RegexIterator($recursiveDirIterator, $filePattern, \RegexIterator::MATCH);
     }
 }
