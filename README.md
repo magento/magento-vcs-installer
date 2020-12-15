@@ -8,11 +8,11 @@ This tool provides a possibility to deploy Magento source code on environments w
 
 1. Open Magento Cloud UI and find link to clone via GIT or `magento-cloud` CLI
 1. Clone repository
-1. Nivagate to the cloned directory
+1. Navigate to the cloned directory
 
-### Remove Magento depndencies
+### Remove Magento dependencies
 
-1. Remove all `magento/*` depndencies from `require` section of `composer.json`
+1. Remove all `magento/*` dependencies from `require` section of `composer.json`
 
 ### Add dependencies
 
@@ -47,13 +47,15 @@ stage:
         "repo": {
             "magento/magento2ce": {
                 "url": "git@github.com:magento-commerce/magento2ce.git",
-                "ref": "dev-2.4-develop",
-                "base": true
+                "ref": "dev-2.4-develop"
             },
             "magento/magento2ee": {
                 "url": "git@github.com:magento-commerce/magento2ee.git",
-                "ref": "dev-2.4-develop",
-                "base": true
+                "ref": "dev-2.4-develop"
+            },
+            "magento/inventory": {
+                "url": "git@github.com:magento-commerce/inventory.git",
+                "ref": "dev-1.2-develop"
             }
         }
     }

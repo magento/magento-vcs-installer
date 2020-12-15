@@ -124,4 +124,25 @@ class Filesystem
     {
         return is_file($file);
     }
+
+    /**
+     * Returns recursive directory iterator for given path with given pattern for files to find
+     *
+     * @param string $dir
+     * @param string $filePattern File pattern to find
+     * @param string $excludePattern Path pattern to exclude
+     * @return \RegexIterator
+     */
+    public function getRecursiveFileIterator(
+        string $dir,
+        string $filePattern,
+        string $excludePattern = ''
+    ): \RegexIterator {
+        $dirIterator = new \RecursiveDirectoryIterator($dir);
+        $recursiveDirIterator = new \RecursiveIteratorIterator($dirIterator);
+        if ($excludePattern) {
+            $recursiveDirIterator = new \RegexIterator($recursiveDirIterator, $excludePattern, \RegexIterator::MATCH);
+        }
+        return new \RegexIterator($recursiveDirIterator, $filePattern, \RegexIterator::MATCH);
+    }
 }
