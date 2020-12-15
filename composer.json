@@ -34,6 +34,7 @@
     },
     "scripts": {
         "test": [
+            "phpstan analyse -c ./tests/static/phpstan.neon",
             "phpcs --encoding=utf-8 --standard=PSR2 --extensions=php src/*"
         ]
     }

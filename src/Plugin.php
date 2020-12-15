@@ -139,8 +139,8 @@ class Plugin implements PluginInterface, EventSubscriberInterface
 
         $this->io->write('Updating composer.lock');
 
-        $composer->getPackage()->setAutoload(...$composerAutoload);
-        $composer->getPackage()->setRequires(...$composerRequire);
+        $composer->getPackage()->setAutoload(array_replace(...$composerAutoload));
+        $composer->getPackage()->setRequires(array_replace(...$composerRequire));
     }
 
     /**

@@ -7,6 +7,8 @@ declare(strict_types=1);
 
 namespace Magento\VcsInstaller\Plugin;
 
+use Generator;
+
 /**
  * Links files between folders.
  */
@@ -72,20 +74,17 @@ class Symlink implements CopierInterface
      * Scan all files from Magento root
      *
      * @param string $path
-     * @return array
+     * @return Generator
      */
-    private function scanFiles(string $path): array
+    private function scanFiles(string $path): Generator
     {
-        $results = [];
         foreach (glob($path . DIRECTORY_SEPARATOR . '*') as $filename) {
-            $results[] = $filename;
+            yield $filename;
 
             if (is_dir($filename)) {
-                $results = array_merge($results, $this->scanFiles($filename));
+                yield from $this->scanFiles($filename);
             }
         }
-
-        return $results;
     }
 
     /**
@@ -96,6 +95,6 @@ class Symlink implements CopierInterface
      */
     private function unlinkFile(string $filename): void
     {
-        stripos(PHP_OS, 'WIN') === 0 && is_dir($filename) ? @rmdir($filename) : @unlink($filename);
+        stripos(PHP_OS_FAMILY, 'WIN') === 0 && is_dir($filename) ? @rmdir($filename) : @unlink($filename);
     }
 }
