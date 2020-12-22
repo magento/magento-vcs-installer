@@ -89,3 +89,24 @@ The possible strategies are:
 ## Usage
 
 After initial installation you'll have to trigger `composer update` command to re-build `composer.lock` files with dependencies from `git` sources.
+
+## Troubleshooting
+
+### Composer timeout error
+
+>   [Symfony\Component\Process\Exception\ProcessTimedOutException]                                  
+  The process "git status --porcelain --untracked-files=no" exceeded the timeout of 300 seconds.  
+
+#### Reason
+
+Composer tries to clone a large repository and eceeds default timeout.
+
+#### Solution
+
+Add next configuration to `composer.json`:
+
+```json
+"config": {
+    "process-timeout": 0
+}
+```
