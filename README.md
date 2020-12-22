@@ -19,7 +19,7 @@ This tool provides a possibility to deploy Magento source code on environments w
 ```
 composer config repositories.installer git git@github.com:magento-commerce/magento-vcs-installer.git
 composer config minimum-stability dev
-composer require "magento/magento-vcs-installer:dev-master" --no-update
+composer require "magento/magento-vcs-installer:^1.0" --no-update
 composer require "magento/ece-tools" --no-update
 ```
 
@@ -41,7 +41,11 @@ stage:
 
 ## Configuration
 
-```
+### Repositories
+
+Specify a list of git repositories in root `composer.json` file of your project via `deploy -> repo` value. The name should represent the project:
+
+```json
 "extra": {
     "deploy": {
         "repo": {
@@ -61,6 +65,26 @@ stage:
     }
 }
 ```
+
+### Copy strategy
+
+You may specify a copying strategy, using `deploy -> strategy` value:
+
+
+```json
+"extra": {
+    "deploy": {
+        "strategy": "copy",
+        "repo": {}
+    }
+}
+```
+
+The possible strategies are:
+
+- **symlink**  - Defalut strategy for local developement and testing.
+- **copy** - Default strategy for deployments on Cloud. Is automatially selected if Cloud enviroenmnt is detected.
+
 
 ## Usage
 
