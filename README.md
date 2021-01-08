@@ -99,11 +99,11 @@ After initial installation you'll have to trigger `composer update` command to r
 
 #### Reason
 
-Composer tries to clone a large repository and eceeds default timeout.
+Composer tries to clone a large repository and exceeds default timeout.
 
 #### Solution
 
-Add next configuration to `composer.json`:
+Add next configuration to the root `composer.json`:
 
 ```json
 "config": {
