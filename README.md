@@ -14,6 +14,24 @@ This tool provides a possibility to deploy Magento source code on environments w
 
 1. Remove all `magento/*` dependencies from `require` section of `composer.json`
 
+### Add auth.json
+
+Add an auth.hson file with credentials:
+
+```json
+{
+    "http-basic": {
+        "repo.magento.com": {
+            "username": "<Public Key>",
+            "password": "<Private Key>"
+        }
+    },
+    "github-oauth": {
+        "github.com": "<GitHub Token>"
+    }
+}
+```
+
 ### Add dependencies
 
 ```
@@ -89,3 +107,24 @@ The possible strategies are:
 ## Usage
 
 After initial installation you'll have to trigger `composer update` command to re-build `composer.lock` files with dependencies from `git` sources.
+
+## Troubleshooting
+
+### Composer timeout error
+
+>   [Symfony\Component\Process\Exception\ProcessTimedOutException]                                  
+  The process "git status --porcelain --untracked-files=no" exceeded the timeout of 300 seconds.  
+
+#### Reason
+
+Composer tries to clone a large repository and exceeds default timeout.
+
+#### Solution
+
+Add next configuration to the root `composer.json`:
+
+```json
+"config": {
+    "process-timeout": 0
+}
+```
