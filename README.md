@@ -14,6 +14,24 @@ This tool provides a possibility to deploy Magento source code on environments w
 
 1. Remove all `magento/*` dependencies from `require` section of `composer.json`
 
+### Add auth.json
+
+Add an auth.hson file with credentials:
+
+```json
+{
+    "http-basic": {
+        "repo.magento.com": {
+            "username": "<Public Key>",
+            "password": "<Private Key>"
+        }
+    },
+    "github-oauth": {
+        "github.com": "<GitHub Token>"
+    }
+}
+```
+
 ### Add dependencies
 
 ```
