@@ -9,5 +9,4 @@ namespace Magento\VcsInstaller\Util;
 
 class FileNotFoundException extends \RuntimeException
 {
-
 }

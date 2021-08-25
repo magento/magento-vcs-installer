@@ -10,6 +10,9 @@ namespace Magento\VcsInstaller\Util;
 use FilesystemIterator;
 use ErrorException;
 
+/**
+ * File IO operations
+ */
 class Filesystem
 {
     /**

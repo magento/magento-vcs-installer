@@ -2,14 +2,6 @@
     "name": "magento/magento-vcs-installer",
     "type": "composer-plugin",
     "license": "OSL-3.0",
-    "authors": [
-        {
-            "name": "Oleh Posyniak",
-            "email": "oposyniak@magento.com"
-        }
-    ],
-    "prefer-stable": true,
-    "minimum-stability": "dev",
     "require": {
         "php": "^7.2",
         "ext-json": "*",
@@ -33,9 +25,11 @@
         "class": "Magento\\VcsInstaller\\Plugin"
     },
     "scripts": {
-        "test": [
+        "test:all": [
             "phpstan analyse -c ./tests/static/phpstan.neon",
             "phpcs --encoding=utf-8 --standard=PSR2 --extensions=php src/*"
         ]
-    }
+    },
+    "prefer-stable": true,
+    "minimum-stability": "dev"
 }

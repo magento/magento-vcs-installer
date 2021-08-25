@@ -175,7 +175,6 @@ class Plugin implements PluginInterface, EventSubscriberInterface
 
             $this->io->write(sprintf('Installing "%s"', $name));
 
-            // @phpstan-ignore-next-line
             if (version_compare(PluginInterface::PLUGIN_API_VERSION, '2.0.0', '<')) {
                 $composer->getDownloadManager()->download($package, $repoDirectory);
             } else {
